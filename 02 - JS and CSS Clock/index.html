@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>JS + CSS Clock</title>
+</head>
+<body>
+
+
+    <div class="clock">
+      <div class="clock-face">
+        <div class="hand hour-hand"></div>
+        <div class="hand min-hand"></div>
+        <div class="hand second-hand"></div>
+      </div>
+    </div>
+
+
+  <style>
+    html {
+      background: #018DED url(https://unsplash.it/1500/1000?image=881&blur=5);
+      background-size: cover;
+      font-family: 'helvetica neue';
+      text-align: center;
+      font-size: 10px;
+    }
+
+    body {
+      margin: 0;
+      font-size: 2rem;
+      display: flex;
+      flex: 1;
+      min-height: 100vh;
+      align-items: center;
+    }
+
+    .clock {
+      width: 30rem;
+      height: 30rem;
+      border: 20px solid white;
+      border-radius: 50%;
+      margin: 50px auto;
+      position: relative; /* when relative is set, means that this is a datum element (基準元素) */
+      padding: 2rem;
+      box-shadow:
+        0 0 0 4px rgba(0,0,0,0.1),
+        inset 0 0 0 3px #EFEFEF,
+        inset 0 0 10px black,
+        0 0 10px rgba(0,0,0,0.2);
+    }
+
+    .clock-face {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform: translateY(-3px); /* account for the height of the clock hands */
+    }
+
+    .hand {
+      width: 50%;
+      height: 6px;
+      background: black;
+      position: absolute; /* absolute, base on the 基準元素 */
+      top: 50%; /* position-related property */
+      transform-origin: right; /* move origin point to right hand side */
+      transform: rotate(90deg); /* set default hand to 12 o'clock */
+      /* transition: all 0.05s; /* transition in this case indicate how fast the transition will be done */
+      transition-timing-function: cubic-bezier(0, 1.25, 1, 1);
+    }
+
+    .second-hand {
+      height: 3px;
+      background: red;
+    }
+
+    .min-hand {
+      width: 40%;
+      left: 10%; /* position-related property */
+      height: 5px;
+    }
+    /* 
+      after shorten the width, this will also affect the transform-origin position,
+      thus we have to push the element from left in order to replace the origin position to the center of clock,
+      that is the reason why width + left should equal 50%
+    */
+
+
+    .hour-hand {
+      width: 30%;
+      left: 20%;
+      height: 7px
+    }
+
+  </style>
+
+  <script>
+
+    const secondHand = document.querySelector('.second-hand');
+    const minuteHand = document.querySelector('.min-hand');
+    const hourHand = document.querySelector('.hour-hand');
+
+    function setDate() {
+      const now = new Date();
+      const second = now.getSeconds();
+      const secondDegree = ((second / 60) * 360) + 90;
+      secondHand.style.transform = `rotate(${secondDegree}deg)`;
+
+      const minute = now.getMinutes();
+      const minuteDegree = ((minute / 60) * 360) + ((second / 60) * 6) + 90;
+      minuteHand.style.transform = `rotate(${minuteDegree}deg)`;
+
+      const hour = now.getHours();
+      const hourDegree = ((hour / 12) * 360) + ((minute / 60) * 30) + ((second / 60) * (30 / 60)) + 90;
+      hourHand.style.transform = `rotate(${hourDegree}deg)`;
+    }
+
+    setInterval(setDate, 1000);
+    // set a time interval that calls the function (setDate) periodically
+
+  </script>
+</body>
+</html>
