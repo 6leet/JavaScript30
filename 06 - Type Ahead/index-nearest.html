@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Type Ahead 👀</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <form class="search-form">
+    <input type="text" class="search" placeholder="City or State">
+    <ul class="suggestions">
+      <li>Filter for a city</li>
+      <li>or a state</li>
+    </ul>
+  </form>
+<script>
+const endpoint = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+const cities = [];
+
+fetch(endpoint)
+  .then(blob => blob.json()) // returns a promise also
+  .then(data => cities.push(...data)); // ... will spread array into push()
+
+const searchInput = document.querySelector('.search');
+const suggestions = document.querySelector('.suggestions');
+
+function searchMatches(query) {
+  const regex = new RegExp(query, 'gi'); // g: global, insensitive
+  const matches = cities.filter(city => {
+    return city.city.match(regex) || city.state.match(regex);
+  });
+  return matches;
+}
+
+function numberWithCommas(x) { // copy from stackoverflow, doesn't know what it means
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function strip(number) {
+    return (parseFloat(number).toFixed(4));
+}
+
+function findNearest(e) {
+  searchInput.value = '';
+  const cityName = this.querySelector('.name').innerHTML.replace('<span class="hl">', '').replace('</span>', '').split(', ')[0];
+  const regex = new RegExp(cityName, 'gi');
+  const matchCity = cities.filter(city => {
+    return city.city.match(regex);
+  })[0];
+
+  function nearestSort(center) {
+    return function(a, b) {
+      const aDist = Math.pow(center.latitude - a.latitude, 2) + Math.pow(center.longitude - a.longitude, 2);
+      const bDist = Math.pow(center.latitude - b.latitude, 2) + Math.pow(center.longitude - b.longitude, 2);
+      return aDist - bDist;
+    }
+  }
+  const nearestCities = cities.sort(nearestSort(matchCity)).slice(0, 10);
+  const html = nearestCities.map(city => {
+    return `
+      <li>
+        <span class="name">${city.city}, ${city.state}</span>
+        <span class="position">(${strip(city.latitude)},${strip(city.longitude)})</span>
+      </li>
+      `;
+  }).join('');
+
+  suggestions.innerHTML = html;
+
+  const matchCities = suggestions.querySelectorAll('li');
+  matchCities.forEach(city => city.addEventListener('click', findNearest));
+}
+
+function displayMatches(e) {
+  const matches = searchMatches(this.value);
+  const regex = new RegExp(this.value, 'gi');
+  const html = matches.map(match => {
+    const cityName = match.city.replace(regex, `<span class="hl">${this.value}</span>`); // replace plain text by text with CSS
+    const stateName = match.state.replace(regex, `<span class="hl">${this.value}</span>`);
+    const population = numberWithCommas(match.population);
+    return `
+      <li>
+        <span class="name">${cityName}, ${stateName}</span>
+        <span class="population">${population}</span>
+      </li>
+    `;
+    // <span> is just a container that make CSS / Javascript more convenient
+  }).join(''); // join(''): convert array into string
+  suggestions.innerHTML = html; // innerHTML: modify the content of this element (suggestions)
+  
+  const matchCities = suggestions.querySelectorAll('li');
+  matchCities.forEach(city => city.addEventListener('click', findNearest));
+}
+searchInput.addEventListener('change', displayMatches);
+searchInput.addEventListener('keyup', displayMatches);
+
+</script>
+</body>
+</html>
