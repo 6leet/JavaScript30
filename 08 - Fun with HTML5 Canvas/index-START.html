@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HTML5 Canvas</title>
+</head>
+<body>
+<canvas id="draw" width="800" height="800"></canvas> <!-- like a drawing board -->
+<script>
+  const canvas = document.querySelector('#draw'); // use # to query by id
+  const ctx = canvas.getContext('2d'); // get a context to draw on (a canvas can own several contexts)
+  canvas.height = window.innerHeight; 
+  canvas.width = window.innerWidth;
+  ctx.strokeStyle = '#BADA55'; // strokeStyle: like drawing line's color, fillStyle: filling's color
+  ctx.lineJoin = 'round'; // define how it looks when a line is not straight and has angles
+  ctx.lineCap = 'round'; // define how it looks at the end of the line
+
+  let isDrawing = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  function draw(e) {
+    if (isDrawing) {
+      ctx.beginPath(); // ?
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(e.offsetX, e.offsetY); // why not other coordinate such as screenX, screenY?
+      [lastX, lastY] = [e.offsetX, e.offsetY]; // es6 feature
+      ctx.stroke();
+    }
+  }
+
+  // don't know why we add listener on canvas instead of ctx
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mousedown', (e) => {
+    isDrawing = true; 
+    [lastX, lastY] = [e.offsetX, e.offsetY]; 
+  });
+  canvas.addEventListener('mouseup', () => isDrawing = false);
+  canvas.addEventListener('mouseout', () => isDrawing = false);
+  </script>
+
+<style>
+  html, body {
+    margin: 0;
+  }
+</style>
+
+</body>
+</html>
