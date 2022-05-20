@@ -18,9 +18,25 @@
   let isDrawing = false;
   let lastX = 0;
   let lastY = 0;
+  let hue = 0;
+  let basewidth = 25;
+  let lineWidthPP = 0;
+  let lineWidthP = 0;
 
   function draw(e) {
     if (isDrawing) {
+      // update lineWidth by speed
+      let speed = Math.sqrt(Math.pow(e.offsetX - lastX, 2) + Math.pow(e.offsetY - lastY, 2));
+      ctx.lineWidth = (lineWidthPP + lineWidthP + basewidth * speed / 100.0) / 3;
+      lineWidthPP = lineWidthP;
+      lineWidthP = ctx.lineWidth;
+
+      // update color iteratively
+      ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+      hue++;
+      hue %= 360;
+
+      // draw line
       ctx.beginPath(); // ?
       ctx.moveTo(lastX, lastY);
       ctx.lineTo(e.offsetX, e.offsetY); // why not other coordinate such as screenX, screenY?
